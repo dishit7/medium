@@ -4,7 +4,8 @@ import {neon} from '@neondatabase/serverless'
 import { User } from './db/schema'
 import { eq } from 'drizzle-orm'
 import { resolveCallback } from 'hono/utils/html'
-import { decode, sign, verify } from 'hono/jwt' 
+import { decode, sign, verify } from 'hono/jwt'
+import authMiddleware from './middleware/authmiddleware' 
 const secret_key='secret_key'
 export type Env ={
   DATABASE_URL:string
@@ -31,13 +32,14 @@ app.post("/user/signup",async (c)=>{
      })
      console.log(resp)
      const token=await sign({email:email},c.env.SECRET_KEY)
-     console.log(token)
-     return c.json({
+      return c.json({
                    msg:"signup successfull",
                    token 
                   })
 })
 
+
+ 
 app.post("/user/signin",async (c)=>{
   const sql=neon(c.env.DATABASE_URL)
   const db=drizzle(sql)
@@ -64,7 +66,7 @@ app.post("/user/signin",async (c)=>{
 })
 
 
-app.post("/blog",(c)=>{
+app.post("/blog",authMiddleware,(c)=>{
   return c.text('post blog')
 })
 
