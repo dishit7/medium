@@ -1,17 +1,20 @@
 import { Hono } from 'hono'
 import { drizzle } from 'drizzle-orm/neon-http'
 import {neon} from '@neondatabase/serverless'
-import { User } from './db/schema'
+import { Posts, User } from './db/schema'
 import { eq } from 'drizzle-orm'
-import { resolveCallback } from 'hono/utils/html'
 import { decode, sign, verify } from 'hono/jwt'
 import authMiddleware from './middleware/authmiddleware' 
+import { PostgresError } from 'postgres'
 const secret_key='secret_key'
 export type Env ={
   DATABASE_URL:string
   SECRET_KEY:string
 }
-const app = new Hono<{Bindings:Env}>()
+export type Variables ={
+  author_id:string
+}
+const app = new Hono<{Bindings:Env,Variables:Variables}>()
 app.get('/', (c) => {
   return c.text('Hello Hono!')
 })
@@ -66,11 +69,34 @@ app.post("/user/signin",async (c)=>{
 })
 
 
-app.post("/blog",authMiddleware,(c)=>{
-  return c.text('post blog')
+app.post("/blog",authMiddleware,async(c)=>{
+  const sql=neon(c.env.DATABASE_URL)
+  const db=drizzle(sql)
+  const authorid=c.get('author_id')
+  const {title,content,published}=await c.req.json()
+  const response= await db.insert(Posts).values({
+    tilte:title,
+    content:content,
+    published:true,
+    authorId:c.get('author_id')
+  }).returning({
+    id:Posts.id
+  })
+  console.log(response)
+   return c.text('post blog')
 })
 
-app.put("/blog",(c)=>{
+app.put("/blog",authMiddleware,async(c)=>{
+  const sql=neon(c.env.DATABASE_URL)
+  const db= drizzle(sql)
+ const{id,title,content}=await c.req.json()
+ const updated_blog=await db.update(Posts).set({
+  tilte:title,
+  content:content
+ }).where(eq(Posts.id,id)).returning({
+  content:Posts.content
+ })
+  console.log(updated_blog)
   return c.text('put blog')
 })
 
