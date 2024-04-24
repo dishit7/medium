@@ -6,6 +6,8 @@ import { eq } from 'drizzle-orm'
 import { decode, sign, verify } from 'hono/jwt'
 import authMiddleware from './middleware/authmiddleware' 
 import { PostgresError } from 'postgres'
+import { signupInput } from '@dishit7/medium-common'
+import { COMPOSED_HANDLER } from 'hono/hono-base'
 const secret_key='secret_key'
 export type Env ={
   DATABASE_URL:string
@@ -24,6 +26,13 @@ app.post("/user/signup",async (c)=>{
      const sql=neon(c.env.DATABASE_URL)
      const db= drizzle(sql)
      const {name,email,password} = await c.req.json()
+     const body=await c.req.json()
+     console.log(body)
+     const validation=signupInput.safeParse(body)
+     console.log(validation)
+     if(!validation.success){
+      return  c.text("err")
+     }
      console.log(name)
 
      const resp =await db.insert(User).values({
