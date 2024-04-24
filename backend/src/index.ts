@@ -100,11 +100,24 @@ app.put("/blog",authMiddleware,async(c)=>{
   return c.text('put blog')
 })
 
-app.get("/blog/:id",(c)=>{
-const id= c.req.param('id')
-console.log('id')
+app.get("/blogs",async(c)=>{
+  const sql=neon(c.env.DATABASE_URL)
+  const db=drizzle(sql)
+  const blogs=await db.select().from(Posts)
+  console.log(blogs)
+  return c.json({"blogs":blogs})
+})
+app.get("/blog/:id",async(c)=>{
+const idString= c.req.param('id')
+const id=idString.split(':')[1]
+console.log(id)
+const sql=neon(c.env.DATABASE_URL)
+const db=drizzle(sql)
+const selected_blog=await db.select().from(Posts).where(eq(Posts.id,id))
+console.log(selected_blog)
 return c.text('blog')
 })
+
 
 
 export default app
