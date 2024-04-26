@@ -7,16 +7,17 @@ import { decode, sign, verify } from 'hono/jwt'
 import authMiddleware from './middleware/authmiddleware' 
 import { PostgresError } from 'postgres'
 import { signupInput } from '@dishit7/medium-common'
-import { COMPOSED_HANDLER } from 'hono/hono-base'
+ import { cors } from 'hono/cors'
 const secret_key='secret_key'
 export type Env ={
-  DATABASE_URL:string
+  DATABASE_URL:string ,
   SECRET_KEY:string
 }
 export type Variables ={
   author_id:string
 }
 const app = new Hono<{Bindings:Env,Variables:Variables}>()
+app.use(cors())
 app.get('/', (c) => {
   return c.text('Hello Hono!')
 })
@@ -24,6 +25,9 @@ app.get('/', (c) => {
 
 app.post("/user/signup",async (c)=>{
      const sql=neon(c.env.DATABASE_URL)
+    //console.log("url is"+c.env.DATABASE_URL)
+   // console.log("secret is"+c.env.SECRET_KEY)
+
      const db= drizzle(sql)
      const {name,email,password} = await c.req.json()
      const body=await c.req.json()
@@ -43,7 +47,9 @@ app.post("/user/signup",async (c)=>{
       id:User.id
      })
      console.log(resp)
-     const token=await sign({email:email},c.env.SECRET_KEY)
+    // console.log("secret"+c.env.SECRET_KEY)
+     const token=await sign({email:email},secret_key)
+     console.log(token)
       return c.json({
                    msg:"signup successfull",
                    token 
@@ -53,6 +59,7 @@ app.post("/user/signup",async (c)=>{
 
  
 app.post("/user/signin",async (c)=>{
+  
   const sql=neon(c.env.DATABASE_URL)
   const db=drizzle(sql)
   const {email,password}=await c.req.json()
@@ -61,7 +68,7 @@ app.post("/user/signin",async (c)=>{
   if(user[0]){
    
   if (password==(user[0].password)){
-    const token= await sign({email:email},c.env.SECRET_KEY)
+    const token= await sign({email:email},secret_key)
     console.log(token)
 
     return c.json({token})
