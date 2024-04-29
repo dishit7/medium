@@ -8,6 +8,7 @@ import authMiddleware from './middleware/authmiddleware'
 import { PostgresError } from 'postgres'
 import { signupInput } from '@dishit7/medium-common'
  import { cors } from 'hono/cors'
+import { PostgresJsPreparedQuery } from 'drizzle-orm/postgres-js'
 const secret_key='secret_key'
 export type Env ={
   DATABASE_URL:string ,
@@ -89,7 +90,7 @@ app.post("/blog",authMiddleware,async(c)=>{
   const sql=neon(c.env.DATABASE_URL)
   const db=drizzle(sql)
   const authorid=c.get('author_id')
-  const {title,content,published}=await c.req.json()
+  const {title,content}=await c.req.json()
   const response= await db.insert(Posts).values({
     tilte:title,
     content:content,
@@ -116,22 +117,31 @@ app.put("/blog",authMiddleware,async(c)=>{
   return c.text('put blog')
 })
 
-app.get("/blogs",async(c)=>{
+app.get("/blogs",authMiddleware,async(c)=>{
   const sql=neon(c.env.DATABASE_URL)
   const db=drizzle(sql)
-  const blogs=await db.select().from(Posts)
+  const blogs=await db.select({
+    id:Posts.id,
+    title:Posts.tilte,
+    content:Posts.content,
+    author_name:User.name
+  }).from(Posts).leftJoin(User,eq(Posts.authorId,User.id))
   console.log(blogs)
   return c.json({"blogs":blogs})
 })
-app.get("/blog/:id",async(c)=>{
-const idString= c.req.param('id')
-const id=idString.split(':')[1]
+app.get("/blog/:id",authMiddleware,async(c)=>{
+const id= c.req.param('id')
 console.log(id)
 const sql=neon(c.env.DATABASE_URL)
 const db=drizzle(sql)
-const selected_blog=await db.select().from(Posts).where(eq(Posts.id,id))
+const selected_blog=await db.select({
+  id:Posts.id,
+  tilte:Posts.tilte,
+  content:Posts.content,
+  author:User.name
+},).from(Posts).where(eq(Posts.id,id)).leftJoin(User,eq(Posts.authorId,User.id))
 console.log(selected_blog)
-return c.text('blog')
+return c.json(selected_blog[0])
 })
 
 

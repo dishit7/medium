@@ -18,8 +18,8 @@ const secret_key='secret_key'
       }
       else{
         try{
-         console.log(c.env.SECRET_KEY)
-             const decoded_token=await verify(token,c.env.SECRET_KEY)
+         //console.log(c.env.SECRET_KEY)
+             const decoded_token=await verify(token,secret_key)
             console.log(decoded_token )
             const user=await db.select().from(User).where(eq(User.email,decoded_token.email))
             
