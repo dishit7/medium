@@ -28,7 +28,7 @@ export const Auth = ({type} :{type:"signup" |"signin"}) =>{
         alert(response.data)
      }else{    
      localStorage.setItem("jwt",jwt)
-     navigate("/blog:id")
+     navigate("/blogs")
     }
     }
     catch(e){

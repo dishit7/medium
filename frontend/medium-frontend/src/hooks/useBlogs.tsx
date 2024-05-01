@@ -2,7 +2,7 @@ import { useEffect ,useState } from "react";
 import axios from "axios"
    interface Blogs {
     id: number,
-            "tilte": string,
+            "title": string,
             "content": string,
             "published": boolean,
             "author_name":  string

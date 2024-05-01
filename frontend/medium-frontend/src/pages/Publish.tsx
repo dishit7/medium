@@ -4,8 +4,10 @@ import axios from "axios"
 
 
 const Payload ={
-    Authorization:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImExQGdtYWlsLmNvbSJ9.o59TsOkxVVnOsUsAhrkjiSQpfOufYuMajzEqhbgD6qU"
+  //  Authorization:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImExQGdtYWlsLmNvbSJ9.o59TsOkxVVnOsUsAhrkjiSQpfOufYuMajzEqhbgD6qU"
+  Authorization:localStorage.getItem('jwt')
    }
+   console.log(Payload)
 export const Publish =()=>{
     const [title,setTitle]=useState("")
     const [content,setContent]=useState("")

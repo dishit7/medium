@@ -4,7 +4,7 @@ import { Avatar } from "./BlogCard"
 
 export const FullBlog = ({blog}:{blog:Blog})=>{
     const size="big"
-     
+     console.log(blog)
     return (<>
         
            <Appbar />

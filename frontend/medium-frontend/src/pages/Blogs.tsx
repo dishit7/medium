@@ -1,12 +1,13 @@
 import { Appbar } from "../components/Appbar"
 import { BlogCard } from "../components/BlogCard"
 import { useBlogs } from "../hooks/useBlogs"
+import { BlogSkeleton } from "./BlogSkeleton"
 
 export const Blogs = ( ) => {
 
     const {loading,blogs}=useBlogs()
     if(loading){
-        return <div>Loading...</div>
+        return <div><BlogSkeleton ></BlogSkeleton></div>
     }else{
 
     }
@@ -24,7 +25,7 @@ export const Blogs = ( ) => {
         {blogs.map((blog)=>{
          return (
             <div>
-            <BlogCard id={blog.id} title={blog.tilte} author={blog.author_name} content={blog.content} publishedDate="27th April 2024"/>
+            <BlogCard id={blog.id} title={blog.title} author={blog.author_name} content={blog.content} publishedDate="27th April 2024"/>
             </div>
          )
         })}
